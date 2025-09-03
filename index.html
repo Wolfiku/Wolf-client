@@ -1,50 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Wolf Client</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background: black;
-      color: white;
-      text-align: center;
-    }
-    #loader {
-      display: none;
-      flex-direction: column;
-      gap: 20px;
-    }
-    #loader p {
-      margin: 0;
-      font-size: 1.5em;
-    }
-    #fatal {
-      display: none;
-      white-space: pre-wrap;
-      padding: 20px;
-      text-align: left;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Wolf Client</title>
+<style>
+  body {
+    margin: 0;
+    font-family: sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: black;
+    color: white;
+    text-align: center;
+    overflow: hidden;
+  }
+  #loader {
+    display: none;
+    flex-direction: column;
+    gap: 20px;
+  }
+  #loader p {
+    margin: 0;
+    font-size: 1.5em;
+  }
+  #author {
+    position: absolute;
+    bottom: 20px;
+    width: 100%;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1rem;
+    color: #aaa;
+  }
+  #fatal {
+    display: none;
+    white-space: pre-wrap;
+    padding: 20px;
+    text-align: left;
+  }
+</style>
 </head>
 <body>
   <div id="loader">
-    <p>Powered by Limbo</p>
-    <p>@wolfikuproduction</p>
+    <iframe src="assets/limbo/loader4.html" sandbox="allow-scripts" style="width:100%; height:100%; border:none;"></iframe>
   </div>
+  <div id="author">@wolfikuproduction</div>
   <div id="fatal"></div>
 
 <script>
+const SHOW_LOADER = 0; // 1 = always show loader, 0 = standard once-per-day
+
 async function checkSystemFile() {
   try {
     const response = await fetch("system/systemdata/staylimbo.important", { cache: "no-store" });
-    if (!response.ok) throw new Error("Missing file");
-    return true;
+    return response.ok;
   } catch {
     return false;
   }
@@ -56,13 +67,13 @@ async function showFatalError() {
     const resp = await fetch("system/systemdata/fatalerror.md");
     fatalDiv.textContent = await resp.text();
   } catch {
-    fatalDiv.textContent = "FATAL ERROR: system files missing.";
+    fatalDiv.textContent = "FATAL ERROR: critical system files missing.";
   }
   fatalDiv.style.display = "block";
 }
 
 function getTodayKey() {
-  return new Date().toISOString().slice(0, 10); // yyyy-mm-dd
+  return new Date().toISOString().slice(0, 10);
 }
 
 async function start() {
@@ -72,108 +83,34 @@ async function start() {
     return;
   }
 
-  const key = "wolfclient_loader_seen";
-  const today = getTodayKey();
-  const lastSeen = localStorage.getItem(key);
-
-  if (lastSeen === today) {
-    // Schon heute gesehen → direkt weiter
-    window.location.href = "system/programms/homescreen.html";
-  } else {
-    // Noch nicht gesehen → Loader anzeigen
+  if (SHOW_LOADER === 1) {
+    // Immer Animation zeigen
     document.getElementById("loader").style.display = "flex";
-    localStorage.setItem(key, today);
-
     setTimeout(() => {
       window.location.href = "system/programms/homescreen.html";
-    }, 3000); // Loader 3 Sekunden anzeigen
+    }, 3000);
+  } else {
+    // Standard: einmal pro Tag
+    const key = "wolfclient_loader_seen";
+    const today = getTodayKey();
+    const lastSeen = localStorage.getItem(key);
+
+    if (lastSeen === today) {
+      // Schon heute gesehen → direkt weiter
+      window.location.href = "system/programms/homescreen.html";
+    } else {
+      // Noch nicht heute gesehen → Loader anzeigen
+      document.getElementById("loader").style.display = "flex";
+      localStorage.setItem(key, today);
+
+      setTimeout(() => {
+        window.location.href = "system/programms/homescreen.html";
+      }, 3000);
+    }
   }
 }
 
 start();
-</script>
-</body>
-</html>    <div id="loader"></div>
-    <div id="author">@wolfikuproduction</div>
-
-<script>
-(async function() {
-    const importantFile = 'system/systemdata/staylimbo.important';
-    const fatalFile = 'system/systemdata/fatalerror.md';
-    const loaderFile = 'assets/limbo/loader4.html';
-
-    async function fileExists(url) {
-        try {
-            const res = await fetch(url, { method: 'HEAD' });
-            return res.ok;
-        } catch (e) {
-            return false;
-        }
-    }
-
-    const exists = await fileExists(importantFile);
-
-    if (!exists) {
-        try {
-            const res = await fetch(fatalFile);
-            const content = await res.text();
-            document.body.innerHTML = '<pre style="white-space: pre-wrap; padding:20px;">' + content + '</pre>';
-        } catch (e) {
-            document.body.innerHTML = '<p style="color:red;">Fatal error: critical system files missing.</p>';
-        }
-        return;
-    }
-
-    // Show Limbo loader animation
-    document.getElementById('loader').innerHTML = `<iframe src="${loaderFile}" sandbox="allow-scripts"></iframe>`;
-
-    // After 3 seconds → go to homescreen
-    setTimeout(() => {
-        window.location.href = 'homescreen.html';
-    }, 3000);
-})();
-</script>
-</body>
-</html>
-<script>
-(async function() {
-    const importantFile = 'system/systemdata/staylimbo.important';
-    const fatalFile = 'system/systemdata/fatalerror.md';
-
-    async function fileExists(url) {
-        try {
-            const res = await fetch(url, { method: 'HEAD' });
-            return res.ok;
-        } catch (e) {
-            return false;
-        }
-    }
-
-    const exists = await fileExists(importantFile);
-
-    if (!exists) {
-        try {
-            const res = await fetch(fatalFile);
-            const content = await res.text();
-            document.getElementById('container').innerHTML = '<pre style="white-space: pre-wrap;">' + content + '</pre>';
-        } catch (e) {
-            document.getElementById('container').innerHTML = '<p style="color:red;">Fatal error: critical system files missing.</p>';
-        }
-        return;
-    }
-
-    const today = new Date().toISOString().split('T')[0];
-    const lastShown = localStorage.getItem('splashShown');
-
-    if (lastShown !== today) {
-        localStorage.setItem('splashShown', today);
-        setTimeout(() => {
-            window.location.href = 'homescreen.html';
-        }, 2000);
-    } else {
-        window.location.href = 'homescreen.html';
-    }
-})();
 </script>
 </body>
 </html>
