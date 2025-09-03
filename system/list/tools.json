@@ -1,0 +1,4 @@
+[
+  { "name": "Demo Page", "file": "demo.html", "type": "web" },
+  { "name": "AI Playground", "file": "ai.html", "type": "ai" }
+]
