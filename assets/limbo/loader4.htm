@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Powered by Limbo</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            opacity: 0;
+            animation: fadeInBody 0.8s ease-in-out forwards;
+        }
+
+        .limbo-container {
+            position: relative;
+            /* Skalierungsfaktor - ändern Sie diesen Wert zum Skalieren */
+            transform: scale(1);
+            transform-origin: center;
+        }
+
+        .powered-text {
+            color: #fff;
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 20px;
+            opacity: 0;
+            animation: fadeInText 2s ease-in-out 0.5s forwards;
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+
+        .limbo-text {
+            font-size: 72px;
+            font-weight: bold;
+            color: #fff;
+            text-align: center;
+            position: relative;
+            text-shadow: 0 0 20px rgba(255,255,255,0.8);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        .limbo-text::before {
+            content: 'LIMBO';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            color: transparent;
+            background: linear-gradient(45deg, #fff 25%, transparent 25%, transparent 75%, #fff 75%);
+            background-size: 10px 10px;
+            -webkit-background-clip: text;
+            background-clip: text;
+            animation: slidePattern 4s linear infinite;
+        }
+
+        .floating-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            background: #fff;
+            border-radius: 50%;
+            opacity: 0;
+            animation: floatUp 6s linear infinite;
+        }
+
+        .particle:nth-child(odd) {
+            animation-duration: 8s;
+        }
+
+        .particle:nth-child(3n) {
+            animation-duration: 5s;
+        }
+
+        .glitch-effect {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 100px;
+            background: repeating-linear-gradient(
+                90deg,
+                transparent,
+                transparent 2px,
+                rgba(255,255,255,0.1) 2px,
+                rgba(255,255,255,0.1) 4px
+            );
+            animation: glitchMove 2s ease-in-out infinite alternate;
+            opacity: 0;
+            animation-delay: 3s;
+        }
+
+        .border-animation {
+            position: absolute;
+            top: -50px;
+            left: -50px;
+            right: -50px;
+            bottom: -50px;
+            border: 2px solid transparent;
+            border-image: linear-gradient(45deg, #fff, transparent, #fff) 1;
+            animation: rotateBorder 4s linear infinite;
+        }
+
+        @keyframes fadeInBody {
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeInText {
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                text-shadow: 0 0 20px rgba(255,255,255,0.8);
+            }
+            50% {
+                transform: scale(1.05);
+                text-shadow: 0 0 30px rgba(255,255,255,1);
+            }
+        }
+
+        @keyframes slidePattern {
+            0% {
+                background-position: 0 0;
+            }
+            100% {
+                background-position: 20px 20px;
+            }
+        }
+
+        @keyframes floatUp {
+            0% {
+                bottom: -10px;
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                bottom: calc(100vh + 10px);
+                opacity: 0;
+            }
+        }
+
+        @keyframes glitchMove {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) translateX(0px);
+            }
+            20% {
+                opacity: 0.3;
+            }
+            80% {
+                opacity: 0.3;
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) translateX(20px);
+            }
+        }
+
+        @keyframes rotateBorder {
+            0% {
+                transform: rotate(0deg);
+                opacity: 0.3;
+            }
+            50% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: rotate(360deg);
+                opacity: 0.3;
+            }
+        }
+
+        /* Skalierungs-Klassen für einfache Anpassung */
+        .scale-small { transform: scale(0.5); }
+        .scale-medium { transform: scale(0.75); }
+        .scale-large { transform: scale(1.25); }
+        .scale-xl { transform: scale(1.5); }
+        .scale-xxl { transform: scale(2); }
+    </style>
+</head>
+<body>
+    <div class="limbo-container">
+        <div class="border-animation"></div>
+        <div class="powered-text">POWERED BY</div>
+        <div class="limbo-text">LIMBO</div>
+        <div class="glitch-effect"></div>
+        <div class="floating-particles" id="particles"></div>
+    </div>
+
+    <script>
+        // Partikel-Einstellungen (einfach im Code änderbar)
+        const PARTICLE_SETTINGS = {
+            enabled: true,        // true/false - Partikel ein/aus
+            count: 20,           // Anzahl der Partikel
+            whiteParticles: true, // true für weiße, false für schwarze Partikel
+        };
+
+        // Partikel generieren
+        function createParticles() {
+            if (!PARTICLE_SETTINGS.enabled) return; // Partikel deaktiviert
+            
+            const particleContainer = document.getElementById('particles');
+            
+            for (let i = 0; i < PARTICLE_SETTINGS.count; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                // Farbe basierend auf Einstellung
+                if (PARTICLE_SETTINGS.whiteParticles) {
+                    particle.style.background = '#fff';
+                } else {
+                    particle.style.background = '#333';
+                    particle.style.boxShadow = '0 0 4px rgba(51,51,51,0.5)';
+                }
+                
+                // Zufällige Eigenschaften
+                const size = Math.random() * 4 + 2;
+                const left = Math.random() * 100;
+                const delay = Math.random() * 6;
+                
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = left + '%';
+                particle.style.animationDelay = delay + 's';
+                
+                particleContainer.appendChild(particle);
+            }
+        }
+
+        // Partikel-Steuerungsfunktionen
+        function enableParticles() {
+            PARTICLE_SETTINGS.enabled = true;
+            document.getElementById('particles').innerHTML = '';
+            createParticles();
+        }
+
+        function disableParticles() {
+            PARTICLE_SETTINGS.enabled = false;
+            document.getElementById('particles').innerHTML = '';
+        }
+
+        function setWhiteParticles() {
+            PARTICLE_SETTINGS.whiteParticles = true;
+            document.getElementById('particles').innerHTML = '';
+            createParticles();
+        }
+
+        function setBlackParticles() {
+            PARTICLE_SETTINGS.whiteParticles = false;
+            document.getElementById('particles').innerHTML = '';
+            createParticles();
+        }
+
+        // Skalierungsfunktionen für einfache Code-Anpassung
+        function setScale(scale) {
+            const container = document.querySelector('.limbo-container');
+            container.style.transform = `scale(${scale})`;
+        }
+
+        // Vordefinierte Skalierungsoptionen
+        function scaleSmall() { setScale(0.5); }
+        function scaleMedium() { setScale(0.75); }
+        function scaleNormal() { setScale(1); }
+        function scaleLarge() { setScale(1.25); }
+        function scaleXL() { setScale(1.5); }
+        function scaleXXL() { setScale(2); }
+
+        // Partikel beim Laden erstellen
+        document.addEventListener('DOMContentLoaded', createParticles);
+
+        // Beispiel für automatische Skalierung basierend auf Bildschirmgröße
+        function responsiveScale() {
+            const width = window.innerWidth;
+            if (width < 600) {
+                setScale(0.6);
+            } else if (width < 900) {
+                setScale(0.8);
+            } else {
+                setScale(1);
+            }
+        }
+
+        // Responsive Skalierung aktivieren
+        window.addEventListener('resize', responsiveScale);
+        responsiveScale(); // Initial ausführen
+    </script>
+</body>
+  </html>
