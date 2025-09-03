@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Wolf Client</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
     body {
         margin: 0;
@@ -18,7 +18,7 @@
         overflow: hidden;
     }
     #loader {
-        display: flex;
+        display: none;
         flex-direction: column;
         gap: 20px;
         width: 100%;
@@ -72,6 +72,10 @@ async function showFatalError() {
     fatalDiv.style.display = "block";
 }
 
+function getTodayKey() {
+    return new Date().toISOString().slice(0, 10); // yyyy-mm-dd
+}
+
 async function start() {
     const valid = await checkSystemFile();
     if (!valid) {
@@ -79,14 +83,26 @@ async function start() {
         return;
     }
 
-    // Immer die Limbo Loader Animation zeigen
-    const loaderFile = 'assets/limbo/loader4.html';
-    document.getElementById("loader").innerHTML = `<iframe src="${loaderFile}" sandbox="allow-scripts"></iframe>`;
+    const key = "wolfclient_loader_seen";
+    const today = getTodayKey();
+    const lastSeen = localStorage.getItem(key);
 
-    // Nach 3 Sekunden weiterleiten
-    setTimeout(() => {
+    if (lastSeen === today) {
+        // Schon heute gesehen → direkt weiter
         window.location.href = "system/programms/homescreen.html";
-    }, 3000);
+    } else {
+        // Noch nicht gesehen → Loader anzeigen
+        document.getElementById("loader").style.display = "flex";
+        localStorage.setItem(key, today);
+
+        const loaderFile = 'assets/limbo/loader4.html';
+        document.getElementById("loader").innerHTML = `<iframe src="${loaderFile}" sandbox="allow-scripts"></iframe>`;
+
+        // Nach 5 Sekunden weiterleiten
+        setTimeout(() => {
+            window.location.href = "system/programms/homescreen.html";
+        }, 5000);
+    }
 }
 
 start();
