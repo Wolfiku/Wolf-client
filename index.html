@@ -52,7 +52,8 @@
   <div id="fatal"></div>
 
 <script>
-const SHOW_LOADER = 0; // 1 = always show loader, 0 = once per day
+// 1 = always show loader, 0 = show once per day
+const SHOW_LOADER = 0; 
 
 async function checkSystemFile() {
   try {
@@ -105,8 +106,8 @@ async function start() {
       window.location.href = "system/programms/homescreen.html";
     } else {
       // Noch nicht heute gesehen → Loader anzeigen
-      loaderDiv.style.display = "flex";          // sicherstellen, dass es sichtbar ist
-      localStorage.setItem(key, today);          // Tag speichern
+      loaderDiv.style.display = "flex";          
+      localStorage.setItem(key, today);          
       setTimeout(() => {
         window.location.href = "system/programms/homescreen.html";
       }, 3000);
