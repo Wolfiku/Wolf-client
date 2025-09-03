@@ -2,121 +2,94 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Wolf Client</title>
 <style>
-  body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: black;
-    color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    text-align: center;
-    overflow: hidden;
-  }
-  #loader {
-    display: none;
-    width: 100%;
-    height: 100%;
-    flex-direction: column;
-  }
-  #author {
-    position: absolute;
-    bottom: 20px;
-    width: 100%;
-    text-align: center;
-    font-weight: bold;
-    font-size: 1rem;
-    color: #aaa;
-  }
-  #fatal {
-    display: none;
-    white-space: pre-wrap;
-    padding: 20px;
-    text-align: left;
-  }
-  iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-  }
+    body {
+        margin: 0;
+        font-family: sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: black;
+        color: white;
+        text-align: center;
+        overflow: hidden;
+    }
+    #loader {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        width: 100%;
+        height: 100%;
+    }
+    #author {
+        position: absolute;
+        bottom: 20px;
+        width: 100%;
+        text-align: center;
+        font-weight: bold;
+        font-size: 1rem;
+        color: #aaa;
+    }
+    iframe {
+        border: none;
+        width: 100%;
+        height: 100%;
+    }
+    #fatal {
+        display: none;
+        white-space: pre-wrap;
+        padding: 20px;
+        text-align: left;
+    }
 </style>
 </head>
 <body>
-  <div id="loader">
-    <iframe src="assets/limbo/loader4.html" sandbox="allow-scripts"></iframe>
-  </div>
-  <div id="author">@wolfikuproduction</div>
-  <div id="fatal"></div>
+    <div id="loader"></div>
+    <div id="fatal"></div>
+    <div id="author">@wolfikuproduction</div>
 
 <script>
-// 1 = always show loader, 0 = show once per day
-const SHOW_LOADER = 1; 
-
 async function checkSystemFile() {
-  try {
-    const response = await fetch("system/systemdata/staylimbo.important", { cache: "no-store" });
-    return response.ok;
-  } catch {
-    return false;
-  }
+    try {
+        const response = await fetch("system/systemdata/staylimbo.important", { cache: "no-store" });
+        return response.ok;
+    } catch {
+        return false;
+    }
 }
 
 async function showFatalError() {
-  const fatalDiv = document.getElementById("fatal");
-  try {
-    const resp = await fetch("system/systemdata/fatalerror.md");
-    fatalDiv.textContent = await resp.text();
-  } catch {
-    fatalDiv.textContent = "FATAL ERROR: critical system files missing.";
-  }
-  fatalDiv.style.display = "block";
-}
-
-function getTodayKey() {
-  return new Date().toISOString().slice(0, 10);
+    const fatalDiv = document.getElementById("fatal");
+    try {
+        const resp = await fetch("system/systemdata/fatalerror.md");
+        fatalDiv.textContent = await resp.text();
+    } catch {
+        fatalDiv.textContent = "FATAL ERROR: critical system files missing.";
+    }
+    fatalDiv.style.display = "block";
 }
 
 async function start() {
-  const valid = await checkSystemFile();
-  if (!valid) {
-    showFatalError();
-    return;
-  }
-
-  const loaderDiv = document.getElementById("loader");
-
-  if (SHOW_LOADER === 1) {
-    // Immer Animation zeigen
-    loaderDiv.style.display = "flex";
-    setTimeout(() => {
-      window.location.href = "system/programms/homescreen.html";
-    }, 3000);
-
-  } else {
-    // Einmal pro Tag
-    const key = "wolfclient_loader_seen";
-    const today = getTodayKey();
-    const lastSeen = localStorage.getItem(key);
-
-    if (lastSeen === today) {
-      // Schon heute gesehen → direkt weiter
-      window.location.href = "system/programms/homescreen.html";
-    } else {
-      // Noch nicht heute gesehen → Loader anzeigen
-      loaderDiv.style.display = "flex";          
-      localStorage.setItem(key, today);          
-      setTimeout(() => {
-        window.location.href = "system/programms/homescreen.html";
-      }, 3000);
+    const valid = await checkSystemFile();
+    if (!valid) {
+        showFatalError();
+        return;
     }
-  }
+
+    // Immer die Limbo Loader Animation zeigen
+    const loaderFile = 'assets/limbo/loader4.html';
+    document.getElementById("loader").innerHTML = `<iframe src="${loaderFile}" sandbox="allow-scripts"></iframe>`;
+
+    // Nach 3 Sekunden weiterleiten
+    setTimeout(() => {
+        window.location.href = "system/programms/homescreen.html";
+    }, 3000);
 }
 
-// Starten, wenn DOM ready
-document.addEventListener("DOMContentLoaded", start);
+start();
 </script>
 </body>
 </html>
