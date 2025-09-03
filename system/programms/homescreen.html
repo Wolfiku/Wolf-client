@@ -1,40 +1,134 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Wolf Client - Homescreen</title>
-  <link rel="stylesheet" href="../../style.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wolf Client - Home</title>
+<style>
+  :root {
+    --green-dark: #0f2e1d;
+    --green: #1f6f3f;
+    --green-light: #42b883;
+    --white: #ffffff;
+    --glass: rgba(15,46,29,0.35);
+  }
+
+  * { box-sizing: border-box; margin:0; padding:0; font-family: system-ui, sans-serif; }
+  html, body { width:100%; height:100%; overflow:hidden; background:#000; }
+
+  body {
+    display:flex; justify-content:center; align-items:center;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  #background {
+    position: fixed; inset:0;
+    background-image: url('../../assets/backgrounds/wolf_client_background_1.png');
+    background-size: cover;
+    background-position: center;
+    filter: brightness(0.6);
+    z-index:-1;
+  }
+
+  .center {
+    display:flex; flex-direction:column; align-items:center; gap:20px;
+    background: var(--glass);
+    padding:30px 40px;
+    border-radius:30px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    text-align:center;
+  }
+
+  .center img.logo {
+    width:220px; height:auto;
+    user-select:none; -webkit-user-drag:none;
+    filter: drop-shadow(0 6px 12px rgba(0,0,0,0.5));
+  }
+
+  .center input#search {
+    width:100%; max-width:400px; padding:12px 16px;
+    border-radius:16px; border:1px solid rgba(255,255,255,0.2);
+    background: rgba(0,0,0,0.35); color: var(--white);
+    font-size:16px; outline:none;
+  }
+
+  .bottom-left, .bottom-right {
+    position:fixed; bottom:20px;
+  }
+
+  .bottom-left { left:20px; }
+  .bottom-right { right:20px; }
+
+  .fab {
+    padding:14px 18px; border:none; border-radius:16px;
+    background: var(--green-dark); color: var(--white);
+    font-size:16px; cursor:pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    display:flex; align-items:center; gap:10px;
+  }
+
+  .fab img { width:24px; height:24px; }
+
+  .fab:hover { background: var(--green); }
+  .fab:active { transform: scale(0.97); }
+
+  #fatal {
+    position:fixed; inset:0; background:#000; color:#fff;
+    display:none; padding:20px; overflow:auto; white-space:pre-wrap; z-index:1000;
+  }
+</style>
 </head>
 <body>
-  <!-- Hintergrund -->
-  <div id="background"></div>
+<div id="background"></div>
 
-  <!-- Logo -->
-  <div class="center">
-    <img src="../../assets/wolfclientlogo.png" alt="Wolf Client Logo" class="logo" />
-    <input type="text" id="search" placeholder="Search tools..." />
-  </div>
+<div class="center">
+  <img src="../../assets/wolfclientlogo.png" alt="Wolf Client Logo" class="logo">
+  <input type="text" id="search" placeholder="Search tools...">
+</div>
 
-  <!-- Buttons -->
-  <div class="bottom-left">
-    <button id="listBtn">
-      <img src="../systemdata/icons/list.png" alt="Tools" />
-    </button>
-  </div>
-  <div class="bottom-right">
-    <button id="settingsBtn">
-      <img src="../systemdata/icons/settings.png" alt="Settings" />
-    </button>
-  </div>
+<div class="bottom-left">
+  <button class="fab" id="listBtn">
+    <img src="../systemdata/icons/list.png" alt="Tools"> Tools
+  </button>
+</div>
+<div class="bottom-right">
+  <button class="fab" id="settingsBtn">
+    <img src="../systemdata/icons/settings.png" alt="Settings"> Settings
+  </button>
+</div>
 
-  <script>
-    // Hintergrundbild laden (aus assets/backgrounds)
-    document.getElementById("background").style.backgroundImage =
-      "url('../../assets/backgrounds/wolf_client_background_1.png')";
+<div id="fatal"></div>
 
-    // Tools laden (aber nicht sofort fatal error werfen)
-    let tools = null;
+<script>
+  let tools = null;
+  async function loadTools(){
+    try {
+      const res = await fetch("../list/tools.json", {cache:"no-store"});
+      if(!res.ok) throw new Error("missing");
+      tools = await res.json();
+    } catch {
+      tools = null;
+    }
+  }
+  loadTools();
+
+  function checkToolsBefore(action){
+    if(!tools || !tools.tools){
+      document.getElementById("fatal").textContent = "Fatal Error: tools.json missing or invalid.";
+      document.getElementById("fatal").style.display = "block";
+    } else {
+      action();
+    }
+  }
+
+  document.getElementById("search").addEventListener("focus", ()=>checkToolsBefore(()=>console.log("Search active")));
+  document.getElementById("listBtn").addEventListener("click", ()=>checkToolsBefore(()=>console.log("Open Tool List")));
+  document.getElementById("settingsBtn").addEventListener("click", ()=>checkToolsBefore(()=>console.log("Open Settings")));
+</script>
+</body>
+</html>    let tools = null;
     async function loadTools() {
       try {
         const response = await fetch("../list/tools.json");
