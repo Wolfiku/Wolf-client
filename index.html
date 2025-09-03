@@ -7,7 +7,7 @@
 <style>
     body {
         margin: 0;
-        font-family: sans-serif;
+        font-family: Arial, sans-serif;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -83,20 +83,22 @@ async function start() {
         return;
     }
 
-    const key = "wolfclient_loader_seen";
+    const storageKey = "wolfclient_loader_seen";
     const today = getTodayKey();
-    const lastSeen = localStorage.getItem(key);
+    const lastSeen = localStorage.getItem(storageKey);
 
     if (lastSeen === today) {
-        // Schon heute gesehen → direkt weiter
+        // Loader heute schon gesehen → direkt homescreen
         window.location.href = "system/programms/homescreen.html";
     } else {
         // Noch nicht gesehen → Loader anzeigen
         document.getElementById("loader").style.display = "flex";
-        localStorage.setItem(key, today);
 
         const loaderFile = 'assets/limbo/loader4.html';
         document.getElementById("loader").innerHTML = `<iframe src="${loaderFile}" sandbox="allow-scripts"></iframe>`;
+
+        // Heute als gesehen speichern
+        localStorage.setItem(storageKey, today);
 
         // Nach 5 Sekunden weiterleiten
         setTimeout(() => {
