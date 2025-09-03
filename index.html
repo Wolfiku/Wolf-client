@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wolf Client Start</title>
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #1e1e1e;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        text-align: center;
+    }
+    #container {
+        max-width: 600px;
+    }
+    #powered {
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+    }
+    #author {
+        margin-top: 2rem;
+        font-weight: bold;
+    }
+</style>
+</head>
+<body>
+<div id="container">
+    <div id="powered">Powered by Limbo</div>
+    <div id="author">@wolfikuproduction</div>
+</div>
+
+<script>
+(async function() {
+    const importantFile = 'system/systemdata/staylimbo.important';
+    const fatalFile = 'system/systemdata/fatalerror.md';
+
+    async function fileExists(url) {
+        try {
+            const res = await fetch(url, { method: 'HEAD' });
+            return res.ok;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    const exists = await fileExists(importantFile);
+
+    if (!exists) {
+        try {
+            const res = await fetch(fatalFile);
+            const content = await res.text();
+            document.getElementById('container').innerHTML = '<pre style="white-space: pre-wrap;">' + content + '</pre>';
+        } catch (e) {
+            document.getElementById('container').innerHTML = '<p style="color:red;">Fatal error: critical system files missing.</p>';
+        }
+        return;
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    const lastShown = localStorage.getItem('splashShown');
+
+    if (lastShown !== today) {
+        localStorage.setItem('splashShown', today);
+        setTimeout(() => {
+            window.location.href = 'homescreen.html';
+        }, 2000);
+    } else {
+        window.location.href = 'homescreen.html';
+    }
+})();
+</script>
+</body>
+</html>
