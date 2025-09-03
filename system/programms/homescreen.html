@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wolf Client – Home</title>
+<style>
+  :root{
+    --green-dark:#0f2e1d;
+    --green:#1f6f3f;
+    --green-light:#42b883;
+    --white:#ffffff;
+    --glass:rgba(15,46,29,0.35);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    color:var(--white);
+    background:#000;
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+  }
+
+  .overlay-loader{
+    position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
+    background:#000;
+    z-index:1000;
+  }
+  .spinner{
+    width:56px; height:56px; border-radius:50%;
+    border:6px solid #1b1b1b; border-top-color:var(--green-light);
+    animation:spin 1s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .app{
+    position:relative; min-height:100%; display:flex; align-items:center; justify-content:center; padding:24px;
+    backdrop-filter: blur(0px);
+  }
+
+  .center{
+    display:flex; flex-direction:column; align-items:center; gap:16px;
+    width:min(720px, 92vw); padding:20px;
+    background:var(--glass);
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:20px;
+  }
+  .logo{
+    width:min(220px, 60vw); height:auto; display:block;
+    filter: drop-shadow(0 10px 24px rgba(0,0,0,0.35));
+    user-select:none; -webkit-user-drag:none;
+  }
+  .search{
+    width:100%; display:flex; gap:10px; align-items:center;
+    background:rgba(0,0,0,0.35);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:16px; padding:10px 14px;
+  }
+  .search input{
+    flex:1; font-size:18px; color:var(--white);
+    background:transparent; border:none; outline:none;
+  }
+  .suggest{
+    width:100%; margin-top:6px; background:rgba(0,0,0,0.55);
+    border:1px solid rgba(255,255,255,0.12); border-radius:14px; overflow:hidden; display:none;
+  }
+  .suggest button{
+    width:100%; text-align:left; background:transparent; color:var(--white);
+    border:none; padding:10px 14px; font-size:16px; display:block;
+  }
+  .suggest button:hover{background:rgba(66,184,131,0.15)}
+
+  .fab{
+    position:fixed; bottom:20px; padding:14px 16px; border:none; border-radius:16px;
+    background:rgba(0,0,0,0.55); color:var(--white); font-size:16px;
+    border:1px solid rgba(255,255,255,0.12);
+    display:flex; gap:10px; align-items:center;
+    backdrop-filter: blur(6px);
+  }
+  .fab:active{transform:scale(0.98)}
+  .fab-left{left:20px}
+  .fab-right{right:20px}
+
+  .panel{
+    position:fixed; inset:0; display:none; z-index:900;
+    background:rgba(0,0,0,0.6); backdrop-filter: blur(6px);
+  }
+  .sheet{
+    position:absolute; left:0; top:0; height:100%; width:min(480px, 90vw);
+    background:rgba(10,24,17,0.9);
+    border-right:1px solid rgba(255,255,255,0.1);
+    padding:16px; overflow:auto;
+  }
+  .sheet h2{margin:0 0 10px 0; font-weight:600}
+  .list-search{width:100%; padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,0.12); background:transparent; color:#fff}
+  .tools{margin-top:12px; display:flex; flex-direction:column; gap:8px}
+  .tool{
+    display:flex; align-items:center; gap:12px; padding:12px; border-radius:12px;
+    border:1px solid rgba(255,255,255,0.08); background:rgba(0,0,0,0.25);
+  }
+  .tool:hover{background:rgba(66,184,131,0.12); cursor:pointer}
+  .tool .icon{width:28px; height:28px; border-radius:8px; background:rgba(255,255,255,0.1); display:inline-block; background-size:cover; background-position:center}
+  .tool .name{font-size:16px}
+
+  .tool-viewer{
+    position:fixed; inset:0; display:none; z-index:950; background:#000;
+  }
+  .tool-frame{position:absolute; inset:0; width:100%; height:100%; border:none; background:#000}
+  .close-tool{
+    position:fixed; right:20px; bottom:20px; z-index:960;
+    padding:12px 14px; border:none; border-radius:14px;
+    background:rgba(0,0,0,0.55); color:#fff; border:1px solid rgba(255,255,255,0.12);
+  }
+
+  .fatal{
+    position:fixed; inset:0; z-index:1100; display:none; background:#000; color:#fff; overflow:auto; padding:20px; white-space:pre-wrap;
+  }
+
+  @media (hover:none){
+    .tool:active{background:rgba(66,184,131,0.18)}
+  }
+</style>
+</head>
+<body>
+
+<div id="loader" class="overlay-loader"><div class="spinner"></div></div>
+
+<div id="fatal" class="fatal"></div>
+
+<main id="app" class="app" hidden>
+  <section class="center">
+    <img id="logo" class="logo" alt="Wolf Client Logo" src="assets/wolfclientlogo.png">
+    <div class="search">
+      <input id="search" type="search" placeholder="Search tools…">
+    </div>
+    <div id="suggest" class="suggest"></div>
+  </section>
+
+  <button id="btnTools" class="fab fab-left">Tools</button>
+  <button id="btnSettings" class="fab fab-right">Settings</button>
+</main>
+
+<div id="panel" class="panel" aria-hidden="true">
+  <aside class="sheet">
+    <h2>All Tools</h2>
+    <input id="listSearch" class="list-search" type="search" placeholder="Filter tools…">
+    <div id="toolList" class="tools"></div>
+  </aside>
+</div>
+
+<div id="viewer" class="tool-viewer" aria-hidden="true">
+  <iframe id="toolFrame" class="tool-frame" title="Tool"></iframe>
+  <button id="closeTool" class="close-tool">Close</button>
+</div>
+
+<script>
+const bgPrimary = "assets/backgrounds/wolf_client_background_1.png";
+const bgFallback = "system/systemdata/fallback/background_wolfclient_fallback.png";
+const toolsJson = "system/list/tools.json";
+const iconsBase = "system/systemdata/icons/";
+
+const el = {
+  loader: document.getElementById("loader"),
+  app: document.getElementById("app"),
+  fatal: document.getElementById("fatal"),
+  search: document.getElementById("search"),
+  suggest: document.getElementById("suggest"),
+  btnTools: document.getElementById("btnTools"),
+  btnSettings: document.getElementById("btnSettings"),
+  panel: document.getElementById("panel"),
+  listSearch: document.getElementById("listSearch"),
+  toolList: document.getElementById("toolList"),
+  viewer: document.getElementById("viewer"),
+  toolFrame: document.getElementById("toolFrame"),
+  closeTool: document.getElementById("closeTool"),
+  logo: document.getElementById("logo")
+};
+
+let tools = [];
+
+function preload(src){
+  return new Promise((resolve)=>{
+    const img = new Image();
+    img.onload = ()=>resolve(src);
+    img.onerror = ()=>resolve(null);
+    img.src = src + (src.includes("?") ? "&" : "?") + "v=" + Date.now();
+  });
+}
+
+function setBackground(url){
+  document.body.style.backgroundImage = "url('"+url+"')";
+}
+
+async function loadBackground(){
+  const primary = await preload(bgPrimary);
+  if(primary){ setBackground(primary); return; }
+  const fb = await preload(bgFallback);
+  setBackground(fb || "");
+}
+
+async function loadTools(){
+  const res = await fetch(toolsJson, {cache:"no-store"});
+  if(!res.ok) throw new Error("tools.json missing");
+  const json = await res.json();
+  if(!Array.isArray(json)) throw new Error("tools.json invalid");
+  tools = json.map(x=>({
+    name: String(x.name||"").trim(),
+    file: String(x.file||"").trim(),
+    type: String(x.type||"").trim()
+  })).filter(x=>x.name && x.file);
+}
+
+function iconFor(type){
+  const map = { ai:"ai.png", web:"web.png", settings:"settings.png", list:"list.png" };
+  const file = map[type] || "web.png";
+  return iconsBase + file;
+}
+
+function renderList(filter=""){
+  const q = filter.trim().toLowerCase();
+  const data = q ? tools.filter(t=>t.name.toLowerCase().includes(q)) : tools;
+  el.toolList.innerHTML = "";
+  data.forEach((t,idx)=>{
+    const row = document.createElement("button");
+    row.className = "tool";
+    row.setAttribute("data-index", String(idx));
+    const ic = document.createElement("span");
+    ic.className = "icon";
+    ic.style.backgroundImage = "url('"+iconFor(t.type)+"')";
+    const nm = document.createElement("span");
+    nm.className = "name";
+    nm.textContent = t.name;
+    row.appendChild(ic); row.appendChild(nm);
+    row.onclick = ()=>openTool(t);
+    el.toolList.appendChild(row);
+  });
+}
+
+function renderSuggest(query){
+  const q = query.trim().toLowerCase();
+  if(!q){ el.suggest.style.display="none"; el.suggest.innerHTML=""; return; }
+  const hits = tools.filter(t=>t.name.toLowerCase().includes(q)).slice(0,5);
+  if(hits.length===0){ el.suggest.style.display="none"; el.suggest.innerHTML=""; return; }
+  el.suggest.innerHTML = "";
+  hits.forEach(t=>{
+    const btn = document.createElement("button");
+    btn.textContent = t.name;
+    btn.onclick = ()=>openTool(t);
+    el.suggest.appendChild(btn);
+  });
+  el.suggest.style.display="block";
+}
+
+async function openTool(tool){
+  const url = "system/programms/" + tool.file;
+  try{
+    const head = await fetch(url, {method:"HEAD", cache:"no-store"});
+    if(!head.ok) throw new Error("tool missing");
+    el.toolFrame.src = url;
+    el.viewer.style.display = "block";
+    el.viewer.setAttribute("aria-hidden","false");
+  }catch(e){
+    alert("Tool not found: "+tool.name+" ("+tool.file+")");
+  }
+}
+
+function closeViewer(){
+  el.toolFrame.src = "about:blank";
+  el.viewer.style.display = "none";
+  el.viewer.setAttribute("aria-hidden","true");
+}
+
+function showPanel(show){
+  el.panel.style.display = show ? "block" : "none";
+  el.panel.setAttribute("aria-hidden", show ? "false" : "true");
+  if(show){
+    renderList(el.listSearch.value||"");
+  }
+}
+
+async function start(){
+  try{
+    const bgPromise = loadBackground();
+    const logoPromise = preload(el.logo.src);
+    await loadTools();
+    await Promise.all([bgPromise, logoPromise]);
+    el.loader.style.display = "none";
+    el.app.hidden = false;
+  }catch(e){
+    try{
+      const res = await fetch("system/systemdata/fatalerror.md", {cache:"no-store"});
+      const txt = res.ok ? await res.text() : "Fatal Error: tools.json missing or invalid.";
+      el.fatal.textContent = txt;
+    }catch{
+      el.fatal.textContent = "Fatal Error: critical files missing.";
+    }
+    el.fatal.style.display = "block";
+  }
+}
+
+el.btnTools.onclick = ()=>showPanel(true);
+el.panel.onclick = (ev)=>{ if(ev.target===el.panel) showPanel(false); };
+el.btnSettings.onclick = ()=>alert("Settings coming soon");
+el.search.oninput = ()=>renderSuggest(el.search.value);
+el.search.onkeydown = (e)=>{
+  if(e.key==="Enter"){
+    const q = el.search.value.trim().toLowerCase();
+    const first = tools.find(t=>t.name.toLowerCase().includes(q));
+    if(first) openTool(first);
+  }
+};
+el.listSearch.oninput = ()=>renderList(el.listSearch.value);
+el.closeTool.onclick = closeViewer;
+
+start();
+</script>
+</body>
+  </html>
