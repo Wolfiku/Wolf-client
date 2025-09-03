@@ -1,4 +1,14 @@
-[
-  { "name": "Demo Page", "file": "demo.html", "type": "web" },
-  { "name": "AI Playground", "file": "ai.html", "type": "ai" }
-]
+{
+  "tools": [
+    {
+      "name": "Example Tool",
+      "file": "example.html",
+      "type": "web"
+    },
+    {
+      "name": "AI Assistant",
+      "file": "ai.html",
+      "type": "ai"
+    }
+  ]
+}
