@@ -8,33 +8,74 @@
     body {
         margin: 0;
         font-family: Arial, sans-serif;
-        background: #1e1e1e;
+        background: #000;
         color: white;
         display: flex;
         justify-content: center;
         align-items: center;
         height: 100vh;
         text-align: center;
-    }
-    #container {
-        max-width: 600px;
-    }
-    #powered {
-        font-size: 1.2rem;
-        margin-bottom: 1rem;
+        overflow: hidden;
     }
     #author {
-        margin-top: 2rem;
+        position: absolute;
+        bottom: 20px;
+        width: 100%;
+        text-align: center;
         font-weight: bold;
+        font-size: 1rem;
+        color: #aaa;
+    }
+    iframe {
+        border: none;
+        width: 100%;
+        height: 100%;
     }
 </style>
 </head>
 <body>
-<div id="container">
-    <div id="powered">Powered by Limbo</div>
+    <div id="loader"></div>
     <div id="author">@wolfikuproduction</div>
-</div>
 
+<script>
+(async function() {
+    const importantFile = 'system/systemdata/staylimbo.important';
+    const fatalFile = 'system/systemdata/fatalerror.md';
+    const loaderFile = 'assets/limbo/loader4.html';
+
+    async function fileExists(url) {
+        try {
+            const res = await fetch(url, { method: 'HEAD' });
+            return res.ok;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    const exists = await fileExists(importantFile);
+
+    if (!exists) {
+        try {
+            const res = await fetch(fatalFile);
+            const content = await res.text();
+            document.body.innerHTML = '<pre style="white-space: pre-wrap; padding:20px;">' + content + '</pre>';
+        } catch (e) {
+            document.body.innerHTML = '<p style="color:red;">Fatal error: critical system files missing.</p>';
+        }
+        return;
+    }
+
+    // Show Limbo loader animation
+    document.getElementById('loader').innerHTML = `<iframe src="${loaderFile}" sandbox="allow-scripts"></iframe>`;
+
+    // After 3 seconds → go to homescreen
+    setTimeout(() => {
+        window.location.href = 'homescreen.html';
+    }, 3000);
+})();
+</script>
+</body>
+</html>
 <script>
 (async function() {
     const importantFile = 'system/systemdata/staylimbo.important';
