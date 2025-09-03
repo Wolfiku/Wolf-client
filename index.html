@@ -1,40 +1,99 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Wolf Client Start</title>
-<style>
+  <meta charset="UTF-8">
+  <title>Wolf Client</title>
+  <style>
     body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        background: #000;
-        color: white;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        text-align: center;
-        overflow: hidden;
+      margin: 0;
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: black;
+      color: white;
+      text-align: center;
     }
-    #author {
-        position: absolute;
-        bottom: 20px;
-        width: 100%;
-        text-align: center;
-        font-weight: bold;
-        font-size: 1rem;
-        color: #aaa;
+    #loader {
+      display: none;
+      flex-direction: column;
+      gap: 20px;
     }
-    iframe {
-        border: none;
-        width: 100%;
-        height: 100%;
+    #loader p {
+      margin: 0;
+      font-size: 1.5em;
     }
-</style>
+    #fatal {
+      display: none;
+      white-space: pre-wrap;
+      padding: 20px;
+      text-align: left;
+    }
+  </style>
 </head>
 <body>
-    <div id="loader"></div>
+  <div id="loader">
+    <p>Powered by Limbo</p>
+    <p>@wolfikuproduction</p>
+  </div>
+  <div id="fatal"></div>
+
+<script>
+async function checkSystemFile() {
+  try {
+    const response = await fetch("system/systemdata/staylimbo.important", { cache: "no-store" });
+    if (!response.ok) throw new Error("Missing file");
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function showFatalError() {
+  const fatalDiv = document.getElementById("fatal");
+  try {
+    const resp = await fetch("system/systemdata/fatalerror.md");
+    fatalDiv.textContent = await resp.text();
+  } catch {
+    fatalDiv.textContent = "FATAL ERROR: system files missing.";
+  }
+  fatalDiv.style.display = "block";
+}
+
+function getTodayKey() {
+  return new Date().toISOString().slice(0, 10); // yyyy-mm-dd
+}
+
+async function start() {
+  const valid = await checkSystemFile();
+  if (!valid) {
+    showFatalError();
+    return;
+  }
+
+  const key = "wolfclient_loader_seen";
+  const today = getTodayKey();
+  const lastSeen = localStorage.getItem(key);
+
+  if (lastSeen === today) {
+    // Schon heute gesehen → direkt weiter
+    window.location.href = "system/programms/homescreen.html";
+  } else {
+    // Noch nicht gesehen → Loader anzeigen
+    document.getElementById("loader").style.display = "flex";
+    localStorage.setItem(key, today);
+
+    setTimeout(() => {
+      window.location.href = "system/programms/homescreen.html";
+    }, 3000); // Loader 3 Sekunden anzeigen
+  }
+}
+
+start();
+</script>
+</body>
+</html>    <div id="loader"></div>
     <div id="author">@wolfikuproduction</div>
 
 <script>
