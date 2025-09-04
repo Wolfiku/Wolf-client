@@ -1,177 +1,215 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Wolf Client - Home</title>
-<style>
-  :root {
-    --green-dark: #0f2e1d;
-    --green: #1f6f3f;
-    --green-light: #42b883;
-    --white: #ffffff;
-    --glass: rgba(15,46,29,0.35);
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wolf Client - Homescreen</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: url("../../assets/backgrounds/wolf_client_background_1.png") no-repeat center center/cover;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: 100vh;
+      overflow: hidden;
+    }
 
-  * { box-sizing: border-box; margin:0; padding:0; font-family: system-ui, sans-serif; }
-  html, body { width:100%; height:100%; overflow:hidden; background:#000; }
+    .logo {
+      margin-top: 40px;
+      width: 150px;
+    }
 
-  body {
-    display:flex; justify-content:center; align-items:center;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-  }
+    .search-bar {
+      margin: 20px;
+      width: 80%;
+      max-width: 500px;
+    }
 
-  #background {
-    position: fixed; inset:0;
-    background-image: url('../../assets/backgrounds/wolf_client_background_1.png');
-    background-size: cover;
-    background-position: center;
-    filter: brightness(0.6);
-    z-index:-1;
-  }
+    .search-bar input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 12px;
+      border: none;
+      font-size: 16px;
+    }
 
-  .center {
-    display:flex; flex-direction:column; align-items:center; gap:20px;
-    background: var(--glass);
-    padding:30px 40px;
-    border-radius:30px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-    text-align:center;
-  }
+    .tools {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      width: 90%;
+      max-width: 900px;
+      margin-top: 20px;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
 
-  .center img.logo {
-    width:220px; height:auto;
-    user-select:none; -webkit-user-drag:none;
-    filter: drop-shadow(0 6px 12px rgba(0,0,0,0.5));
-  }
+    .tool {
+      background: rgba(0, 50, 0, 0.8);
+      border-radius: 12px;
+      padding: 15px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
 
-  .center input#search {
-    width:100%; max-width:400px; padding:12px 16px;
-    border-radius:16px; border:1px solid rgba(255,255,255,0.2);
-    background: rgba(0,0,0,0.35); color: var(--white);
-    font-size:16px; outline:none;
-  }
+    .tool:hover {
+      transform: scale(1.05);
+    }
 
-  .bottom-left, .bottom-right {
-    position:fixed; bottom:20px;
-  }
+    .tool img {
+      width: 60px;
+      height: 60px;
+      object-fit: contain;
+      margin-bottom: 10px;
+    }
 
-  .bottom-left { left:20px; }
-  .bottom-right { right:20px; }
+    .tool .name {
+      font-weight: bold;
+    }
 
-  .fab {
-    padding:14px 18px; border:none; border-radius:16px;
-    background: var(--green-dark); color: var(--white);
-    font-size:16px; cursor:pointer;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-    display:flex; align-items:center; gap:10px;
-  }
+    .tool .name.missing {
+      color: red;
+    }
 
-  .fab img { width:24px; height:24px; }
+    .buttons {
+      position: fixed;
+      bottom: 20px;
+      width: 90%;
+      display: flex;
+      justify-content: space-between;
+    }
 
-  .fab:hover { background: var(--green); }
-  .fab:active { transform: scale(0.97); }
+    .btn {
+      background: rgba(0, 100, 0, 0.8);
+      padding: 10px 20px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: bold;
+    }
 
-  #fatal {
-    position:fixed; inset:0; background:#000; color:#fff;
-    display:none; padding:20px; overflow:auto; white-space:pre-wrap; z-index:1000;
-  }
-</style>
+    .btn:hover {
+      background: rgba(0, 150, 0, 0.8);
+    }
+  </style>
 </head>
 <body>
-<div id="background"></div>
-
-<div class="center">
   <img src="../../assets/wolfclientlogo.png" alt="Wolf Client Logo" class="logo">
-  <input type="text" id="search" placeholder="Search tools...">
-</div>
+  
+  <div class="search-bar">
+    <input type="text" id="search" placeholder="Search tools...">
+  </div>
 
-<div class="bottom-left">
-  <button class="fab" id="listBtn">
-    <img src="../systemdata/icons/list.png" alt="Tools"> Tools
-  </button>
-</div>
-<div class="bottom-right">
-  <button class="fab" id="settingsBtn">
-    <img src="../systemdata/icons/settings.png" alt="Settings"> Settings
-  </button>
-</div>
+  <div class="tools" id="tools"></div>
 
-<div id="fatal"></div>
+  <div class="buttons">
+    <div class="btn" id="listBtn">Tools</div>
+    <div class="btn" id="settingsBtn">Settings</div>
+  </div>
 
-<script>
-  let tools = null;
-  async function loadTools(){
-    try {
-      const res = await fetch("../list/tools.json", {cache:"no-store"});
-      if(!res.ok) throw new Error("missing");
-      tools = await res.json();
-    } catch {
-      tools = null;
-    }
-  }
-  loadTools();
+  <script>
+    const toolsContainer = document.getElementById("tools");
+    const searchInput = document.getElementById("search");
 
-  function checkToolsBefore(action){
-    if(!tools || !tools.tools){
-      document.getElementById("fatal").textContent = "Fatal Error: tools.json missing or invalid.";
-      document.getElementById("fatal").style.display = "block";
-    } else {
-      action();
-    }
-  }
+    let tools = [];
 
-  document.getElementById("search").addEventListener("focus", ()=>checkToolsBefore(()=>console.log("Search active")));
-  document.getElementById("listBtn").addEventListener("click", ()=>checkToolsBefore(()=>console.log("Open Tool List")));
-  document.getElementById("settingsBtn").addEventListener("click", ()=>checkToolsBefore(()=>console.log("Open Settings")));
-</script>
-</body>
-</html>    let tools = null;
-    async function loadTools() {
+    async function loadTools(){
+      const url = "../list/tools.list";
+      let text;
       try {
-        const response = await fetch("../list/tools.json");
-        if (!response.ok) throw new Error("missing");
-        tools = await response.json();
-      } catch (err) {
-        tools = null; // nur merken, nicht sofort abbrechen
+        const res = await fetch(url, {cache:"no-store"});
+        if(!res.ok) throw new Error("File missing");
+        text = await res.text();
+      } catch {
+        toolsContainer.innerHTML = "<p style='color:red;'>Fatal Error: tools.list missing.</p>";
+        return;
       }
+
+      tools = [];
+      const lines = text.split("\n").map(l => l.trim());
+      let emptyCount = 0;
+      for (let line of lines){
+        if(line === ""){
+          emptyCount++;
+          if(emptyCount >= 3) break;
+          continue;
+        }
+        emptyCount = 0;
+        if(line === "[end]") break;
+
+        const [path, meta] = line.split("=");
+        if(!path || !meta){
+          console.warn("Skipping invalid line:", line);
+          continue;
+        }
+
+        let entry = {
+          file: path.trim(),
+          name: "Name fehlend",
+          kategorie: "Standard",
+          author: null,
+          iconfile: "../../system/systemdata/icons/defaulttool.png"
+        };
+
+        const attrs = meta.replace(/^\[|\]$/g,"").split(",");
+        for(let attr of attrs){
+          const [key, value] = attr.split("=");
+          if(key && value){
+            entry[key.trim().toLowerCase()] = value.trim();
+          }
+        }
+
+        // Name fehlend rot markieren
+        if(entry.name === "Name fehlend"){
+          entry.nameClass = "missing";
+        } else {
+          entry.nameClass = "";
+        }
+
+        // Unbekannte Kategorie → Standard
+        if(!entry.kategorie) entry.kategorie = "Standard";
+
+        tools.push(entry);
+      }
+
+      renderTools();
     }
+
+    function renderTools(){
+      toolsContainer.innerHTML = "";
+      const query = searchInput.value.toLowerCase();
+      tools
+        .filter(t => t.name.toLowerCase().includes(query) || (t.author && t.author.toLowerCase().includes(query)))
+        .forEach(tool => {
+          const div = document.createElement("div");
+          div.className = "tool";
+          div.innerHTML = `
+            <img src="${tool.iconfile}" alt="icon" onerror="this.src='../../system/systemdata/icons/defaulttool.png'">
+            <div class="name ${tool.nameClass}">${tool.name}</div>
+            <div class="category">${tool.kategorie}</div>
+          `;
+          div.addEventListener("click", ()=> {
+            window.location.href = tool.file;
+          });
+          toolsContainer.appendChild(div);
+        });
+    }
+
+    searchInput.addEventListener("input", renderTools);
+
+    document.getElementById("settingsBtn").addEventListener("click", ()=>{
+      window.location.href = "limbosettings2.html";
+    });
+
+    document.getElementById("listBtn").addEventListener("click", ()=>{
+      window.scrollTo({top: toolsContainer.offsetTop, behavior:"smooth"});
+    });
+
     loadTools();
-
-    // Event Listener → Fehler nur dann anzeigen, wenn Interaktion stattfindet
-    function checkToolsBefore(action) {
-      if (!tools || !tools.tools) {
-        window.location.href = "../systemdata/fatalerror.md";
-      } else {
-        action();
-      }
-    }
-
-    // Suchleiste
-    document.getElementById("search").addEventListener("focus", () => {
-      checkToolsBefore(() => {
-        console.log("Search active");
-        // TODO: Search logic einbauen
-      });
-    });
-
-    // Tool-Liste Button
-    document.getElementById("listBtn").addEventListener("click", () => {
-      checkToolsBefore(() => {
-        console.log("Open tool list");
-        // TODO: Tool-Liste einblenden
-      });
-    });
-
-    // Einstellungen Button
-    document.getElementById("settingsBtn").addEventListener("click", () => {
-      checkToolsBefore(() => {
-        console.log("Open settings");
-        // TODO: Settings-Seite öffnen
-      });
-    });
   </script>
 </body>
 </html>
