@@ -8,27 +8,44 @@
   body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background: url('../../assets/backgrounds/wolf_client_background_1.png') no-repeat center center fixed;
-    background-size: cover;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
   }
 
-  .container {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
+  /* Loader Vollbild schwarz */
+  #loader {
+    position: fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background-color:black;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:1000;
+    opacity:1;
+    transition: opacity 1s ease;
+  }
+
+  #loader img {
+    width:50%;
+    max-width:400px;
+  }
+
+  #mainContent {
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-start;
+    min-height:100vh;
+    background: url('../../assets/backgrounds/wolf_client_background_1.png') no-repeat center center/cover;
+    background-size: cover;
+    padding-top: 40px;
     box-sizing: border-box;
   }
 
   .logo {
-    max-width: 200px;
-    width: 40%;
-    margin-bottom: 20px;
+    width:50%;
+    max-width:400px;
+    margin-bottom:20px;
+    cursor: pointer;
   }
 
   .search {
@@ -66,24 +83,12 @@
     transition: transform 0.2s;
   }
 
-  .tool:hover {
-    transform: scale(1.05);
-  }
+  .tool:hover { transform: scale(1.05); }
 
-  .tool img {
-    max-width: 64px;
-    margin-bottom: 10px;
-  }
+  .tool img { max-width:64px; margin-bottom:10px; }
 
-  .tool h3 {
-    margin: 0;
-    font-size: 16px;
-    color: darkgreen;
-  }
-
-  .tool .missing {
-    color: red;
-  }
+  .tool h3 { margin:0; font-size:16px; color:darkgreen; }
+  .tool .missing { color:red; }
 
   .bottom-buttons {
     position: fixed;
@@ -106,66 +111,78 @@
     transition: background 0.3s;
   }
 
-  .bottom-buttons button:hover {
-    background-color: limegreen;
-  }
+  .bottom-buttons button:hover { background-color: limegreen; }
 </style>
 </head>
 <body>
-<div class="container">
-  <img src="../../assets/wolfclientlogo.png" alt="Wolf Client Logo" class="logo">
 
+<!-- Loader -->
+<div id="loader">
+  <img src="../../assets/wolfclientlogo.png" alt="Wolf Client Logo">
+</div>
+
+<!-- Main Content -->
+<div id="mainContent" class="container">
+  <img src="../../assets/wolfclientlogo.png" alt="Wolf Client Logo" class="logo" id="logo">
+
+  <!-- Suchleiste -->
   <div class="search">
     <input type="text" id="searchInput" placeholder="Search tools...">
   </div>
 
-  <div class="tools-grid" id="toolsGrid">
-    <!-- Dynamisch gefüllt -->
-  </div>
-</div>
+  <!-- Tools Grid -->
+  <div class="tools-grid" id="toolsGrid"></div>
 
-<div class="bottom-buttons">
-  <button onclick="showToolsList()">Tools</button>
-  <button onclick="openSettings()">Settings</button>
+  <!-- Bottom Buttons -->
+  <div class="bottom-buttons">
+    <button onclick="showToolsList()">Tools</button>
+    <button onclick="openSettings()">Settings</button>
+  </div>
 </div>
 
 <script>
 const toolsGrid = document.getElementById("toolsGrid");
 const searchInput = document.getElementById("searchInput");
+const mainContent = document.getElementById("mainContent");
+const loader = document.getElementById("loader");
+const logo = document.getElementById("logo");
 
-function openTool(path) {
-  const win = window.open(path, "_blank");
-  if (!win) {
-    alert("Failed to open tool: " + path);
-  }
-}
+// Loader Animation
+setTimeout(() => {
+  loader.style.opacity = 0;
+  setTimeout(() => {
+    loader.style.display = 'none';
+    mainContent.style.display = 'flex';
+  }, 1000);
+}, 1000);
 
+// Logo Click → Made by @wolfiku
+logo.addEventListener("click", () => {
+  alert("Made by @wolfiku");
+});
+
+// Settings Button
 function openSettings() {
-  openTool("../../system/programms/limbosettings2.html");
+  window.open("../../system/programms/limbosettings2.html", "_blank");
 }
 
+// Tools Liste laden
 async function loadTools() {
   try {
     const response = await fetch("../../system/list/tools.list");
     if (!response.ok) throw new Error("Invalid or missing tools.list");
     const text = await response.text();
-
     const lines = text.split("\n").map(l => l.trim());
     const tools = [];
     let emptyCount = 0;
 
     for (let line of lines) {
-      if (!line) {
-        emptyCount++;
-        if (emptyCount >= 3) break;
-        continue;
-      }
+      if (!line) { emptyCount++; if(emptyCount>=3) break; continue; }
       emptyCount = 0;
-
       if (line === "[end]") break;
 
       const match = line.match(/^(.+?)=\[(.+)\]$/);
-      if (!match) continue;
+      if(!match) continue;
 
       const filePath = match[1];
       const inside = match[2];
@@ -177,52 +194,46 @@ async function loadTools() {
       let icon = "../../system/systemdata/icons/defaulttool.png";
 
       for (let part of parts) {
-        const [key, value] = part.split("=").map(s => s.trim());
-        if (key && value) {
-          switch (key.toLowerCase()) {
-            case "name": name = value; break;
-            case "kategorie": category = value || "standard"; break;
-            case "author": author = value; break;
-            case "iconfile": icon = value; break;
-          }
+        const [key,value] = part.split("=").map(s=>s.trim());
+        if(!key||!value) continue;
+        switch(key.toLowerCase()){
+          case "name": name=value; break;
+          case "kategorie": category=value||"standard"; break;
+          case "author": author=value; break;
+          case "iconfile": icon=value; break;
         }
       }
 
-      tools.push({ filePath, name, category, author, icon });
+      tools.push({filePath,name,category,author,icon});
     }
 
     displayTools(tools);
-  } catch (e) {
+
+  } catch(e) {
     toolsGrid.innerHTML = `<p style="color:red; font-weight:bold;">Error: ${e.message}</p>`;
   }
 }
 
-function displayTools(tools) {
+// Tools anzeigen
+function displayTools(tools){
   toolsGrid.innerHTML = "";
-  tools.forEach(tool => {
+  tools.forEach((tool,i)=>{
     const div = document.createElement("div");
-    div.className = "tool";
-    div.onclick = () => openTool(tool.filePath);
-
-    div.innerHTML = `
-      <img src="${tool.icon}" onerror="this.src='../../system/systemdata/icons/defaulttool.png'">
-      <h3 class="${tool.name === 'Name missing' ? 'missing' : ''}">${tool.name}</h3>
-    `;
+    div.className="tool";
+    div.onclick = ()=>window.open(tool.filePath,"_blank");
+    div.innerHTML = `<img src="${tool.icon}" onerror="this.src='../../system/systemdata/icons/defaulttool.png'">
+                     <h3 class="${tool.name==='Name missing'?'missing':''}">${tool.name}</h3>`;
     toolsGrid.appendChild(div);
   });
 
-  searchInput.addEventListener("input", () => {
+  // Suche
+  searchInput.addEventListener("input",()=>{
     const value = searchInput.value.toLowerCase();
-    document.querySelectorAll(".tool").forEach((div, i) => {
+    document.querySelectorAll(".tool").forEach((div,i)=>{
       const tool = tools[i];
-      if (
-        tool.name.toLowerCase().includes(value) ||
-        (tool.author && tool.author.toLowerCase().includes(value))
-      ) {
-        div.style.display = "";
-      } else {
-        div.style.display = "none";
-      }
+      if(tool.name.toLowerCase().includes(value) || (tool.author && tool.author.toLowerCase().includes(value))){
+        div.style.display="";
+      } else div.style.display="none";
     });
   });
 }
