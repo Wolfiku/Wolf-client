@@ -1,251 +1,238 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Wolf Client - Homescreen</title>
-  <link rel="stylesheet" href="../style.css">
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: url("../assets/backgrounds/wolf_client_background_1.png") no-repeat center center fixed;
-      background-size: cover;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
+<meta charset="UTF-8">
+<title>Wolf Client - Homescreen</title>
+<link rel="stylesheet" href="../../style.css">
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: url('../../assets/backgrounds/wolf_client_background_1.png') no-repeat center center fixed;
+    background-size: cover;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
 
-    /* Container Layout */
-    .container {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      box-sizing: border-box;
-    }
+  .container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+  }
 
-    /* Logo */
-    .logo {
-      max-width: 200px;
-      width: 40%;
-      margin-bottom: 20px;
-    }
+  .logo {
+    max-width: 200px;
+    width: 40%;
+    margin-bottom: 20px;
+  }
 
-    /* Suchleiste */
-    .search {
-      width: 90%;
-      max-width: 500px;
-      display: flex;
-      justify-content: center;
-      margin-bottom: 20px;
-    }
+  .search {
+    width: 90%;
+    max-width: 500px;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
 
-    .search input {
-      flex: 1;
-      padding: 12px;
-      border-radius: 20px;
-      border: 1px solid #ccc;
-      font-size: 16px;
-      text-align: center;
-    }
+  .search input {
+    flex: 1;
+    padding: 12px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    text-align: center;
+  }
 
-    /* Tools Grid */
-    .tools-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: 20px;
-      width: 100%;
-      max-width: 1000px;
-    }
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 20px;
+    width: 100%;
+    max-width: 1000px;
+  }
 
-    .tool {
-      background: white;
-      border-radius: 20px;
-      padding: 15px;
-      text-align: center;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
+  .tool {
+    background: white;
+    border-radius: 20px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
 
-    .tool:hover {
-      transform: scale(1.05);
-    }
+  .tool:hover {
+    transform: scale(1.05);
+  }
 
-    .tool img {
-      max-width: 64px;
-      margin-bottom: 10px;
-    }
+  .tool img {
+    max-width: 64px;
+    margin-bottom: 10px;
+  }
 
-    .tool h3 {
-      margin: 0;
-      font-size: 16px;
-      color: darkgreen;
-    }
+  .tool h3 {
+    margin: 0;
+    font-size: 16px;
+    color: darkgreen;
+  }
 
-    .tool .missing {
-      color: red;
-    }
+  .tool .missing {
+    color: red;
+  }
 
-    /* Bottom Buttons */
-    .bottom-buttons {
-      position: fixed;
-      bottom: 20px;
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      padding: 0 20px;
-      box-sizing: border-box;
-    }
+  .bottom-buttons {
+    position: fixed;
+    bottom: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px;
+    box-sizing: border-box;
+  }
 
-    .bottom-buttons button {
-      padding: 12px 20px;
-      border: none;
-      border-radius: 20px;
-      background-color: darkgreen;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
+  .bottom-buttons button {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 20px;
+    background-color: darkgreen;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
 
-    .bottom-buttons button:hover {
-      background-color: limegreen;
-    }
-  </style>
+  .bottom-buttons button:hover {
+    background-color: limegreen;
+  }
+</style>
 </head>
 <body>
-  <div class="container">
-    <img src="../assets/wolfclientlogo.png" alt="Wolf Client Logo" class="logo">
+<div class="container">
+  <img src="../../assets/wolfclientlogo.png" alt="Wolf Client Logo" class="logo">
 
-    <!-- Suchleiste -->
-    <div class="search">
-      <input type="text" id="searchInput" placeholder="Search tools...">
-    </div>
-
-    <!-- Tools -->
-    <div class="tools-grid" id="toolsGrid">
-      <!-- Dynamisch gefüllt -->
-    </div>
+  <div class="search">
+    <input type="text" id="searchInput" placeholder="Search tools...">
   </div>
 
-  <!-- Bottom Buttons -->
-  <div class="bottom-buttons">
-    <button onclick="showToolsList()">Tools</button>
-    <button onclick="openSettings()">Settings</button>
+  <div class="tools-grid" id="toolsGrid">
+    <!-- Dynamisch gefüllt -->
   </div>
+</div>
 
-  <script>
-    const toolsGrid = document.getElementById("toolsGrid");
-    const searchInput = document.getElementById("searchInput");
+<div class="bottom-buttons">
+  <button onclick="showToolsList()">Tools</button>
+  <button onclick="openSettings()">Settings</button>
+</div>
 
-    // Öffnet Tools im Vollbild
-    function openTool(path) {
-      const win = window.open(path, "_blank");
-      if (!win) {
-        alert("Failed to open tool: " + path);
+<script>
+const toolsGrid = document.getElementById("toolsGrid");
+const searchInput = document.getElementById("searchInput");
+
+function openTool(path) {
+  const win = window.open(path, "_blank");
+  if (!win) {
+    alert("Failed to open tool: " + path);
+  }
+}
+
+function openSettings() {
+  openTool("../../system/programms/limbosettings2.html");
+}
+
+async function loadTools() {
+  try {
+    const response = await fetch("../../system/list/tools.list");
+    if (!response.ok) throw new Error("Invalid or missing tools.list");
+    const text = await response.text();
+
+    const lines = text.split("\n").map(l => l.trim());
+    const tools = [];
+    let emptyCount = 0;
+
+    for (let line of lines) {
+      if (!line) {
+        emptyCount++;
+        if (emptyCount >= 3) break;
+        continue;
       }
-    }
+      emptyCount = 0;
 
-    // Settings direkt öffnen
-    function openSettings() {
-      openTool("../system/programms/limbosettings2.html");
-    }
+      if (line === "[end]") break;
 
-    // Tools laden
-    async function loadTools() {
-      try {
-        const response = await fetch("../system/list/tools.list");
-        if (!response.ok) throw new Error("Invalid or missing tools.list");
-        const text = await response.text();
+      const match = line.match(/^(.+?)=\[(.+)\]$/);
+      if (!match) continue;
 
-        const lines = text.split("\n").map(l => l.trim());
-        const tools = [];
-        let emptyCount = 0;
+      const filePath = match[1];
+      const inside = match[2];
+      const parts = inside.split(",").map(p => p.trim());
 
-        for (let line of lines) {
-          if (!line) {
-            emptyCount++;
-            if (emptyCount >= 3) break;
-            continue;
+      let name = "Name missing";
+      let category = "standard";
+      let author = "";
+      let icon = "../../system/systemdata/icons/defaulttool.png";
+
+      for (let part of parts) {
+        const [key, value] = part.split("=").map(s => s.trim());
+        if (key && value) {
+          switch (key.toLowerCase()) {
+            case "name": name = value; break;
+            case "kategorie": category = value || "standard"; break;
+            case "author": author = value; break;
+            case "iconfile": icon = value; break;
           }
-          emptyCount = 0;
-
-          if (line === "[end]") break;
-
-          const match = line.match(/^(.+?)=\[(.+)\]$/);
-          if (!match) continue;
-
-          const filePath = match[1];
-          const inside = match[2];
-          const parts = inside.split(",").map(p => p.trim());
-
-          let name = "Name missing";
-          let category = "standard";
-          let author = "";
-          let icon = "../system/systemdata/icons/defaulttool.png";
-
-          for (let part of parts) {
-            const [key, value] = part.split("=").map(s => s.trim());
-            if (key && value) {
-              switch (key.toLowerCase()) {
-                case "name": name = value; break;
-                case "kategorie": category = value || "standard"; break;
-                case "author": author = value; break;
-                case "iconfile": icon = value; break;
-              }
-            }
-          }
-
-          tools.push({ filePath, name, category, author, icon });
         }
-
-        displayTools(tools);
-      } catch (e) {
-        toolsGrid.innerHTML = `<p style="color:red; font-weight:bold;">Error: ${e.message}</p>`;
       }
+
+      tools.push({ filePath, name, category, author, icon });
     }
 
-    // Tools anzeigen
-    function displayTools(tools) {
-      toolsGrid.innerHTML = "";
-      tools.forEach(tool => {
-        const div = document.createElement("div");
-        div.className = "tool";
-        div.onclick = () => openTool(tool.filePath);
+    displayTools(tools);
+  } catch (e) {
+    toolsGrid.innerHTML = `<p style="color:red; font-weight:bold;">Error: ${e.message}</p>`;
+  }
+}
 
-        div.innerHTML = `
-          <img src="${tool.icon}" onerror="this.src='../system/systemdata/icons/defaulttool.png'">
-          <h3 class="${tool.name === 'Name missing' ? 'missing' : ''}">${tool.name}</h3>
-        `;
-        toolsGrid.appendChild(div);
-      });
+function displayTools(tools) {
+  toolsGrid.innerHTML = "";
+  tools.forEach(tool => {
+    const div = document.createElement("div");
+    div.className = "tool";
+    div.onclick = () => openTool(tool.filePath);
 
-      // Suchfunktion
-      searchInput.addEventListener("input", () => {
-        const value = searchInput.value.toLowerCase();
-        document.querySelectorAll(".tool").forEach((div, i) => {
-          const tool = tools[i];
-          if (
-            tool.name.toLowerCase().includes(value) ||
-            (tool.author && tool.author.toLowerCase().includes(value))
-          ) {
-            div.style.display = "";
-          } else {
-            div.style.display = "none";
-          }
-        });
-      });
-    }
+    div.innerHTML = `
+      <img src="${tool.icon}" onerror="this.src='../../system/systemdata/icons/defaulttool.png'">
+      <h3 class="${tool.name === 'Name missing' ? 'missing' : ''}">${tool.name}</h3>
+    `;
+    toolsGrid.appendChild(div);
+  });
 
-    function showToolsList() {
-      alert("Tools list loaded from tools.list");
-    }
+  searchInput.addEventListener("input", () => {
+    const value = searchInput.value.toLowerCase();
+    document.querySelectorAll(".tool").forEach((div, i) => {
+      const tool = tools[i];
+      if (
+        tool.name.toLowerCase().includes(value) ||
+        (tool.author && tool.author.toLowerCase().includes(value))
+      ) {
+        div.style.display = "";
+      } else {
+        div.style.display = "none";
+      }
+    });
+  });
+}
 
-    // Start
-    loadTools();
-  </script>
+function showToolsList() {
+  alert("Tools list loaded from tools.list");
+}
+
+// Start
+loadTools();
+</script>
 </body>
 </html>
